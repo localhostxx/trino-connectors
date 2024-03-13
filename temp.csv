@@ -1,5 +1,0 @@
-time,cpu,field1,memory,price,speed,tag1
-2024-03-07T09:21:09.002Z,null,10.0,null,null,null,value1
-2024-03-07T09:24:53.207Z,apple,null,null,1000.0,null,null
-2024-03-07T09:27:07.742286Z,null,null,ssd,null,10.0,null
-2024-03-07T09:27:07.742286Z,null,null,hdd,null,5.0,null
