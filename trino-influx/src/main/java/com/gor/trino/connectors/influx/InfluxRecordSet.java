@@ -19,7 +19,7 @@ public class InfluxRecordSet implements RecordSet {
     private final List<InfluxColumnHandle> columnHandles;
     private final List<Type> columnTypes;
 
-    private TupleDomain<ColumnHandle> tupleDomain;
+    private TupleDomain<ColumnHandle> constraint;
 
     public InfluxRecordSet(@NonNull InfluxSplit split, @NonNull List<InfluxColumnHandle> columnHandles) {
         this.columnHandles = columnHandles;
@@ -30,7 +30,7 @@ public class InfluxRecordSet implements RecordSet {
             types.add(column.getColumnType());
         }
         this.columnTypes = types.build();
-        this.tupleDomain = split.getTupleDomain();
+        this.constraint = split.getConstraint();
     }
 
     @Override
@@ -40,8 +40,7 @@ public class InfluxRecordSet implements RecordSet {
 
     @Override
     public RecordCursor cursor() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'cursor'");
+        return new InfluxRecordCursor(tableName, columnHandles, constraint);
     }
 
 }

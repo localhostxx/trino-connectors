@@ -3,6 +3,7 @@ package com.gor.trino.connectors.influx;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.trino.spi.connector.ColumnHandle;
 import io.trino.spi.connector.ConnectorTableHandle;
 import io.trino.spi.predicate.TupleDomain;
 
@@ -11,19 +12,20 @@ public class InfluxTableHandle implements ConnectorTableHandle {
     private final String tableName;
     private final String schemaName;
 
-    private final TupleDomain<InfluxColumnHandle> constraint;
+    private final TupleDomain<ColumnHandle> constraint;
 
     @JsonCreator
     public InfluxTableHandle(
-            @JsonProperty String schemaName,
-            @JsonProperty String tableName) {
+            @JsonProperty("schemaName") String schemaName,
+            @JsonProperty("tableName") String tableName) {
+
         this.schemaName = schemaName;
         this.tableName = tableName;
 
         this.constraint = TupleDomain.all();
     }
 
-    public InfluxTableHandle(String schemaName, String tableName, TupleDomain<InfluxColumnHandle> constraint) {
+    public InfluxTableHandle(String schemaName, String tableName, TupleDomain<ColumnHandle> constraint) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.constraint = constraint;
@@ -31,16 +33,17 @@ public class InfluxTableHandle implements ConnectorTableHandle {
 
     @JsonProperty
     public String getTableName() {
-        return tableName;
+        return this.tableName;
     }
 
     @JsonProperty
     public String getSchemaName() {
-        return schemaName;
+        return this.schemaName;
     }
 
-    public TupleDomain<InfluxColumnHandle> getConstraint() {
-        return constraint;
+    @JsonProperty
+    public TupleDomain<ColumnHandle> getConstraint() {
+        return this.constraint;
     }
 
 }

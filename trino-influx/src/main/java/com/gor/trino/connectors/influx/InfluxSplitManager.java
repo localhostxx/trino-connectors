@@ -14,6 +14,7 @@ import lombok.NonNull;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,8 +40,8 @@ public class InfluxSplitManager implements ConnectorSplitManager {
         checkState(table != null, "Table %s.%s no longer exists", tableHandle.getSchemaName(),
                 tableHandle.getTableName());
 
-        List<InfluxSplit> splits = List.of();
-        splits.add(new InfluxSplit(tableHandle.getTableName()));
+        List<InfluxSplit> splits = new ArrayList<>();
+        splits.add(new InfluxSplit(tableHandle.getTableName(), tableHandle.getConstraint()));
         Collections.shuffle(splits);
 
         return new FixedSplitSource(splits);

@@ -10,13 +10,14 @@ import io.trino.spi.predicate.TupleDomain;
 public class InfluxSplit implements ConnectorSplit {
 
     private final String tableName;
-    private TupleDomain<ColumnHandle> tupleDomain;
+    private TupleDomain<ColumnHandle> constraint;
 
     @JsonCreator
-    public InfluxSplit(@JsonProperty("tableName") String tableName) {
+    public InfluxSplit(
+            @JsonProperty("tableName") String tableName,
+            @JsonProperty("constraint") TupleDomain<ColumnHandle> constraint) {
         this.tableName = tableName;
-        this.tupleDomain = null;
-        // TODO: Implement TupleDomain
+        this.constraint = constraint;
     }
 
     @Override
@@ -30,8 +31,8 @@ public class InfluxSplit implements ConnectorSplit {
     }
 
     @JsonProperty
-    public TupleDomain<ColumnHandle> getTupleDomain() {
-        return tupleDomain;
+    public TupleDomain<ColumnHandle> getConstraint() {
+        return constraint;
     }
 
 }

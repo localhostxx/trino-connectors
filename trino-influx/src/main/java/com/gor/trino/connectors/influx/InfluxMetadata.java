@@ -1,29 +1,27 @@
 package com.gor.trino.connectors.influx;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 
 import io.trino.spi.connector.ColumnHandle;
 import io.trino.spi.connector.ColumnMetadata;
-import io.trino.spi.connector.Connector;
 import io.trino.spi.connector.ConnectorMetadata;
 import io.trino.spi.connector.ConnectorSession;
 import io.trino.spi.connector.ConnectorTableHandle;
 import io.trino.spi.connector.ConnectorTableMetadata;
+import io.trino.spi.connector.Constraint;
+import io.trino.spi.connector.ConstraintApplicationResult;
 import io.trino.spi.connector.SchemaTableName;
 import io.trino.spi.connector.SchemaTablePrefix;
 import io.trino.spi.connector.TableColumnsMetadata;
 import io.trino.spi.connector.TableNotFoundException;
+import io.trino.spi.predicate.TupleDomain;
 
 public class InfluxMetadata implements ConnectorMetadata {
 
@@ -41,9 +39,6 @@ public class InfluxMetadata implements ConnectorMetadata {
 
     @Override
     public List<SchemaTableName> listTables(ConnectorSession session, Optional<String> schemaNameOrNull) {
-
-        System.out.println("listTables: " + schemaNameOrNull);
-
         Set<String> schemaNames = schemaNameOrNull.map(Set::of).orElse(Set.of("default"));
         ImmutableList.Builder<SchemaTableName> builder = ImmutableList.builder();
         for (String schemaName : schemaNames) {
@@ -61,10 +56,6 @@ public class InfluxMetadata implements ConnectorMetadata {
             String schemaName = prefix.getSchema().get();
             String tableName = prefix.getTable().get();
 
-            if (!client.isMeasurementExists(tableName)) {
-                return null;
-            }
-
             InfluxTable table = client.getTable(tableName);
 
             SchemaTableName schemaTableName = new SchemaTableName(schemaName, tableName);
@@ -81,6 +72,7 @@ public class InfluxMetadata implements ConnectorMetadata {
             SchemaTableName schemaTableName = new SchemaTableName("default", tableName);
             TableColumnsMetadata tableColumnsMetadata = new TableColumnsMetadata(schemaTableName,
                     Optional.of(table.getColumnsMetadata()));
+
             builder.add(tableColumnsMetadata);
         });
 
@@ -90,10 +82,6 @@ public class InfluxMetadata implements ConnectorMetadata {
 
     @Override
     public ConnectorTableHandle getTableHandle(ConnectorSession session, SchemaTableName tableName) {
-
-        if (!client.isMeasurementExists(tableName.getTableName())) {
-            return null;
-        }
         return new InfluxTableHandle(tableName.getSchemaName(), tableName.getTableName());
     }
 
@@ -117,9 +105,8 @@ public class InfluxMetadata implements ConnectorMetadata {
                     new SchemaTableName(handle.getSchemaName(), handle.getTableName()));
 
         ImmutableMap.Builder<String, ColumnHandle> columnHandles = ImmutableMap.builder();
-        int idx = 0;
         for (ColumnMetadata column : table.getColumnsMetadata()) {
-            ColumnHandle columnHandle = new InfluxColumnHandle(column.getName(), column.getType(), idx++);
+            ColumnHandle columnHandle = new InfluxColumnHandle(column.getName(), column.getType());
             columnHandles.put(column.getName(), columnHandle);
         }
         return columnHandles.build();
@@ -130,6 +117,25 @@ public class InfluxMetadata implements ConnectorMetadata {
             ColumnHandle columnHandle) {
         InfluxColumnHandle influxColumnHandle = (InfluxColumnHandle) columnHandle;
         return new ColumnMetadata(influxColumnHandle.getColumnName(), influxColumnHandle.getColumnType());
+    }
+
+    @Override
+    public Optional<ConstraintApplicationResult<ConnectorTableHandle>> applyFilter(ConnectorSession session,
+            ConnectorTableHandle handle, Constraint constraint) {
+        InfluxTableHandle tableHandle = (InfluxTableHandle) handle;
+
+        TupleDomain<ColumnHandle> oldDomain = tableHandle.getConstraint();
+        TupleDomain<ColumnHandle> newDomain = oldDomain.intersect(constraint.getSummary());
+
+        if (newDomain.equals(oldDomain)) {
+            return Optional.empty();
+        }
+
+        InfluxTableHandle newTableHandle = new InfluxTableHandle(tableHandle.getSchemaName(),
+                tableHandle.getTableName(),
+                newDomain);
+
+        return Optional.of(new ConstraintApplicationResult<>(newTableHandle, constraint.getSummary(), false));
     }
 
 }

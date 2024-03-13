@@ -13,16 +13,13 @@ public class InfluxColumnHandle implements ColumnHandle {
     private final String columnName;
     private final Type columnType;
 
-    private final int ordinalPosition;
-
     @JsonCreator
     public InfluxColumnHandle(
             @JsonProperty(value = "columnName", required = true) String columnName,
-            @JsonProperty(value = "columnType", required = true) Type columnType,
-            @JsonProperty(value = "ordinalPosition", required = true) int ordinalPosition) {
+            @JsonProperty(value = "columnType", required = true) Type columnType) {
+
         this.columnName = columnName;
         this.columnType = columnType;
-        this.ordinalPosition = ordinalPosition;
     }
 
     @JsonProperty
@@ -33,11 +30,6 @@ public class InfluxColumnHandle implements ColumnHandle {
     @JsonProperty
     public Type getColumnType() {
         return columnType;
-    }
-
-    @JsonProperty
-    public int getOrdinalPosition() {
-        return ordinalPosition;
     }
 
 }
