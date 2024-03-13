@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  trino:
+    image: trinodb/trino
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./trino/etc:/usr/lib/trino/etc:ro
+      - ./trino/catalog:/etc/trino/catalog
+      - ../trino-influx/target/trino-influx-1.0-SNAPSHOT:/usr/lib/trino/plugin/trino-influx
+
+  # Enable this to run influxdb locally
+  # influxdb:
+  #   image: influxdb:1.8
+  #   platform: linux/amd64
+  #   env_file:
+  #     - influxv.env
+  #   volumes:
+  #     - influxdbv:/var/lib/influxdb:rw
+  #   ports:
+  #     - "8086:8086"
+
+volumes:
+  influxdbv:
+
+networks:
+  default:
+    name: trino-influxdb
