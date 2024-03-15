@@ -2,8 +2,6 @@ package com.gor.trino.connectors.influx;
 
 import java.util.List;
 
-import org.eclipse.jetty.http.HttpFields.Immutable;
-
 import com.google.common.collect.ImmutableList;
 
 import io.trino.spi.connector.ColumnHandle;

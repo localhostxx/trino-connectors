@@ -9,7 +9,6 @@ import io.airlift.slice.Slices;
 import io.trino.spi.connector.ColumnHandle;
 import io.trino.spi.connector.RecordCursor;
 import io.trino.spi.predicate.TupleDomain;
-import io.trino.spi.type.BigintType;
 import io.trino.spi.type.BooleanType;
 import io.trino.spi.type.DoubleType;
 import io.trino.spi.type.Type;
@@ -57,10 +56,9 @@ public class InfluxRecordCursor implements RecordCursor {
         if (!tableDataIterator.hasNext())
             return false;
 
-        if (isTimeColumnPresent) {
-            fields = tableDataIterator.next();
-        } else {
-            fields = new ArrayList<>(tableDataIterator.next());
+        fields = new ArrayList<>(tableDataIterator.next());
+
+        if (!isTimeColumnPresent) {
             fields.remove(0);
         }
 
@@ -83,10 +81,9 @@ public class InfluxRecordCursor implements RecordCursor {
 
     @Override
     public long getLong(int field) {
-        checkFieldType(field, BigintType.BIGINT);
+
         String value = fields.get(field).toString();
         Double doubleValue = Double.parseDouble(value);
-
         return doubleValue.longValue();
     }
 
@@ -104,7 +101,7 @@ public class InfluxRecordCursor implements RecordCursor {
 
     @Override
     public Object getObject(int field) {
-        throw new UnsupportedOperationException("Unimplemented method 'getObject'");
+        throw new UnsupportedOperationException("getObject is not supported");
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.influxdb.dto.QueryResult;
 import io.trino.spi.type.BigintType;
 import io.trino.spi.type.BooleanType;
 import io.trino.spi.type.DoubleType;
+import io.trino.spi.type.TimestampType;
 import io.trino.spi.type.Type;
 import io.trino.spi.type.VarcharType;
 
@@ -90,7 +91,7 @@ public class InfluxCache {
     public static Map<String, Type> getTableSchema(String measurementName)
             throws ExecutionException, InterruptedException {
         Map<String, Type> schema = new LinkedHashMap<>();
-        schema.put("time", VarcharType.VARCHAR);
+        schema.put("time", TimestampType.TIMESTAMP_MICROS);
 
         CompletableFuture<Map<String, Type>> fieldKeysFuture = CompletableFuture.supplyAsync(() -> {
             Map<String, Type> fieldKeys = new HashMap<>();

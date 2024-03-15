@@ -7,11 +7,8 @@ import lombok.NonNull;
 
 public class InfluxClient {
 
-    private final InfluxConfig config;
-
     @Inject
     public InfluxClient(@NonNull InfluxConfig config) {
-        this.config = config;
 
         if (InfluxCache.getClient() == null) {
             InfluxCache.connectToInflux(
