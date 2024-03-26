@@ -53,6 +53,9 @@ public class InfluxRecordCursor implements RecordCursor {
 
     @Override
     public boolean advanceNextPosition() {
+        if (tableDataIterator == null)
+            return false;
+
         if (!tableDataIterator.hasNext())
             return false;
 
